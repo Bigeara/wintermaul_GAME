@@ -173,33 +173,45 @@ end
 
 
 function CWintermaulGameRound:OnEntityKilled( event )
+	print("You killed me! HOW COULD YOU!")
 	local killedUnit = EntIndexToHScript( event.entindex_killed )
 	if not killedUnit then
 		return
 	end
+
+	print("my gold bounty was: ",killedUnit:GetGoldBounty())
 
 	for i, unit in pairs( self._vEnemiesRemaining ) do
 		if killedUnit == unit then
 			table.remove( self._vEnemiesRemaining, i )
 			break
 		end
-	end	
+	end
 	if killedUnit.Wintermaul_IsCore then
 		self._nCoreUnitsKilled = self._nCoreUnitsKilled + 1
 		if self._entKillCountSubquest then
 			self._entKillCountSubquest:SetTextReplaceValue( QUEST_TEXT_REPLACE_VALUE_CURRENT_VALUE, self._nCoreUnitsKilled )
 		end
 	end
+	print("the world fades around me")
 
 	local attackerUnit = EntIndexToHScript( event.entindex_attacker or -1 )
 	if attackerUnit then
 		-- Here we need some way of using the tower ID to update round
 		local playerID = attackerUnit:GetPlayerOwnerID()
+		local ownerPlayerID = attackerUnit:GetOwner():GetPlayerID()
+		local ownder = attackerUnit:GetOwner()
+		print("playerID: ", playerID)
+		print("ownerPlayerID: ", playerID)
+		print("owner, ", ownder)
 		local playerStats = self._vPlayerStats[ playerID ]
 		if playerStats then
 			playerStats.nCreepsKilled = playerStats.nCreepsKilled + 1
+			ModifyGold(playerID,10,false,0)
+			print("im have incremented someones gold (",playerID,")")
 		end
 	end
+	print("and now i leave this mortal realm")
 end
 
 

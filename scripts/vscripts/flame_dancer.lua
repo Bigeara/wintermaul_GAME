@@ -2,6 +2,7 @@ require('buildinghelper')
 
 BUILD_TIME=1.0
 
+
 function getBuildingPoint(keys)
 	local point = BuildingHelper:AddBuildingToGrid(keys.target_points[1], 2, keys.caster)
 	if point ~= -1 then
