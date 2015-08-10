@@ -39,16 +39,50 @@ function CWintermaulGameSpawner:ReadConfiguration( name, kv, gameRound )
 end
 
 function CWintermaulGameSpawner:_LoadPossibleSpawns( kvSpawns )
+	print("load possible spawns function")
+	vPossibleSpawnsNames = {}
 	self._vPossibleSpawns = {}
 	if type( kvSpawns ) == "table" then
-		for k,v in pairs( kvSpawns ) do
-			self._vPossibleSpawns[(tonumber(k))] = v
+		print("its a table")
+		local i
+		while true do
+			i = #vPossibleSpawnsNames + 1
+			if kvSpawns[string.format(i)] == nil then
+				print("element ", i, " was nil")
+				break
+			end
+			table.insert(vPossibleSpawnsNames, kvSpawns[string.format(i)])
+			print("key: ", i, " val: ", kvSpawns[string.format(i)])
 		end
 	else
 		print("its not a table")
 	end
+	print("what the fuck are you fucking doing")
+	for k,v in pairs( vPossibleSpawnsNames ) do
+		print(self:_SearchSpawnTable(v))
+		table.insert(self._vPossibleSpawns, self:_SearchSpawnTable(v))
+		for kk,vv in pairs(self:_SearchSpawnTable(v)) do
+			print("---- key: ", kk, " val: ", vv)
+		end
+		print("| key: ", k, " | val: ", v, " |")
+	end
+		for k,v in pairs( self._vPossibleSpawns ) do
+		print("key: ", k, "val: ", v.szSpawnerName, v.szFirstWaypoint)
+	end
 end
 
+function CWintermaulGameSpawner:_SearchSpawnTable( sSpawnName )
+	local spawn
+	for k,v in pairs(self._gameRound._gameMode._vSpawnsList) do
+		if v.szSpawnerName == sSpawnName then
+			spawn = v
+		end
+	end
+	if spawn == nil then
+		print("could not find ", sSpawnName)
+	end
+	return spawn
+end
 
 function CWintermaulGameSpawner:PostLoad( spawnerList )
 	self._waitForUnit = spawnerList[ self._szWaitForUnit ]
@@ -180,17 +214,17 @@ end
 function CWintermaulGameSpawner:_UpdateSpawn( index )
 	self._vecSpawnLocation = Vector( 0, 0, 0 )
 	self._entWaypoint = nil
-	if self._vPossibleSpawns == nil then
-		self:_GetSpawnerInfo(index)
-	else
-		local spawnerIndex = self._vPossibleSpawns[(index % (#self._vPossibleSpawns + 1))]
-		self:_GetSpawnerInfo(spawnerIndex)
-	end
 
+	self:_GetSpawnerInfo(index)
 end
 
 function CWintermaulGameSpawner:_GetSpawnerInfo( index )
-	local spawnInfo = self._gameRound._gameMode._vSpawnsList[ index ]
+	local spawnInfo
+	if self._vPossibleSpawns == nil then
+		spawnInfo = self._gameRound._gameMode._vSpawnsList[ index ]
+	else
+		spawnInfo = self._vPossibleSpawns[ (index % (#self._vPossibleSpawns + 1)) ]
+	end
 	if spawnInfo == nil then
 		print( string.format( "Failed to get random spawn info for spawner %s.", self._szName ) )
 		return
